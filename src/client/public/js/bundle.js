@@ -59,7 +59,7 @@
 	
 	var _application2 = _interopRequireDefault(_application);
 	
-	var _AppStateActionCreators = __webpack_require__(/*! ./actions/AppStateActionCreators.js */ 176);
+	var _AppStateActionCreators = __webpack_require__(/*! ./actions/AppStateActionCreators.js */ 169);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -20847,10 +20847,10 @@
 
 	'use strict';
 	
-	var _AppStateActionCreators = __webpack_require__(/*! ../actions/AppStateActionCreators.js */ 176);
+	var _AppStateActionCreators = __webpack_require__(/*! ../actions/AppStateActionCreators.js */ 169);
 	
 	var React = __webpack_require__(/*! react */ 1);
-	var AppStateStore = __webpack_require__(/*! ../stores/AppStateStore */ 169);
+	var AppStateStore = __webpack_require__(/*! ../stores/AppStateStore */ 174);
 	
 	
 	var Application = React.createClass({
@@ -20870,6 +20870,59 @@
 	        AppStateStore.removeChangeListener(this._onAppStateChange);
 	    },
 	    render: function render() {
+	        var Markup;
+	        if (this.state.user) {
+	            Markup = React.createElement(
+	                'div',
+	                null,
+	                React.createElement(
+	                    'h3',
+	                    null,
+	                    'User Info:'
+	                ),
+	                React.createElement(
+	                    'p',
+	                    null,
+	                    'DisplayName: ',
+	                    this.state.user.displayName
+	                ),
+	                React.createElement(
+	                    'p',
+	                    null,
+	                    'Domain: ',
+	                    this.state.user.domain
+	                ),
+	                React.createElement(
+	                    'a',
+	                    { href: '/logout' },
+	                    'logout'
+	                )
+	            );
+	        } else {
+	            Markup = React.createElement(
+	                'div',
+	                null,
+	                React.createElement(
+	                    'a',
+	                    { href: '/auth/facebook' },
+	                    'login with facebook'
+	                ),
+	                React.createElement('br', null),
+	                React.createElement(
+	                    'a',
+	                    { href: '/auth/twitter' },
+	                    'login with twitter'
+	                ),
+	                React.createElement('br', null),
+	                React.createElement(
+	                    'a',
+	                    { href: '/auth/google' },
+	                    'login with google+'
+	                ),
+	                React.createElement('br', null)
+	            );
+	        }
+	        console.log('rendering app');
 	        return React.createElement(
 	            'div',
 	            null,
@@ -20885,7 +20938,9 @@
 	                        (0, _AppStateActionCreators.setGreeting)('you clicked the button!');
 	                    } },
 	                'click me'
-	            )
+	            ),
+	            React.createElement('br', null),
+	            Markup
 	        );
 	    }
 	});
@@ -20894,62 +20949,34 @@
 
 /***/ },
 /* 169 */
-/*!************************************************!*\
-  !*** ./src/client/app/stores/AppStateStore.js ***!
-  \************************************************/
+/*!**********************************************************!*\
+  !*** ./src/client/app/actions/AppStateActionCreators.js ***!
+  \**********************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	var AppDispatcher = __webpack_require__(/*! ../dispatcher/AppDispatcher */ 170);
-	var EventEmitter = __webpack_require__(/*! events */ 174).EventEmitter;
-	var assign = __webpack_require__(/*! object-assign */ 175);
 	
-	var CHANGE_EVENT = 'change';
-	
-	var AppState = {
-		greeting: ""
-	};
-	
-	//setter functions here
-	function setAppState(state) {
-		AppState = assign({}, state);
-	}
 	function setGreeting(message) {
-		AppState.greeting = message;
+	    var action = {
+	        type: 'set_greeting',
+	        message: message
+	    };
+	    AppDispatcher.dispatch(action);
 	}
-	function emitChange() {
-		AppStateStore.emit(CHANGE_EVENT);
-	}
-	
-	var AppStateStore = assign({}, EventEmitter.prototype, {
-		addChangeListener: function addChangeListener(callback) {
-			this.on(CHANGE_EVENT, callback);
-		},
-		removeChangeListener: function removeChangeListener(callback) {
-			this.removeListener(CHANGE_EVENT, callback);
-		},
-		getAppState: function getAppState() {
-			return AppState;
-		}
-	});
-	
-	function handleAction(action) {
-		switch (action.type) {
-			case 'set_app_state':
-				setAppState(action.state);
-				emitChange();
-				break;
-			case 'set_greeting':
-				setGreeting(action.message);
-				emitChange();
-				break;
-			default: // .. do nothing
-		}
+	function setAppState(state) {
+	    var action = {
+	        type: 'set_app_state',
+	        state: state
+	    };
+	    AppDispatcher.dispatch(action);
 	}
 	
-	AppStateStore.dispatchToken = AppDispatcher.register(handleAction);
-	module.exports = AppStateStore;
+	module.exports = {
+	    setGreeting: setGreeting,
+	    setAppState: setAppState
+	};
 
 /***/ },
 /* 170 */
@@ -21282,6 +21309,65 @@
 
 /***/ },
 /* 174 */
+/*!************************************************!*\
+  !*** ./src/client/app/stores/AppStateStore.js ***!
+  \************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var AppDispatcher = __webpack_require__(/*! ../dispatcher/AppDispatcher */ 170);
+	var EventEmitter = __webpack_require__(/*! events */ 175).EventEmitter;
+	var assign = __webpack_require__(/*! object-assign */ 176);
+	
+	var CHANGE_EVENT = 'change';
+	
+	var AppState = {
+		greeting: ""
+	};
+	
+	//setter functions here
+	function setAppState(state) {
+		AppState = assign({}, state);
+	}
+	function setGreeting(message) {
+		AppState.greeting = message;
+	}
+	function emitChange() {
+		AppStateStore.emit(CHANGE_EVENT);
+	}
+	
+	var AppStateStore = assign({}, EventEmitter.prototype, {
+		addChangeListener: function addChangeListener(callback) {
+			this.on(CHANGE_EVENT, callback);
+		},
+		removeChangeListener: function removeChangeListener(callback) {
+			this.removeListener(CHANGE_EVENT, callback);
+		},
+		getAppState: function getAppState() {
+			return AppState;
+		}
+	});
+	
+	function handleAction(action) {
+		switch (action.type) {
+			case 'set_app_state':
+				setAppState(action.state);
+				emitChange();
+				break;
+			case 'set_greeting':
+				setGreeting(action.message);
+				emitChange();
+				break;
+			default: // .. do nothing
+		}
+	}
+	
+	AppStateStore.dispatchToken = AppDispatcher.register(handleAction);
+	module.exports = AppStateStore;
+
+/***/ },
+/* 175 */
 /*!********************************************************!*\
   !*** (webpack)/~/node-libs-browser/~/events/events.js ***!
   \********************************************************/
@@ -21588,7 +21674,7 @@
 
 
 /***/ },
-/* 175 */
+/* 176 */
 /*!**********************************!*\
   !*** ./~/object-assign/index.js ***!
   \**********************************/
@@ -21678,37 +21764,6 @@
 		return to;
 	};
 
-
-/***/ },
-/* 176 */
-/*!**********************************************************!*\
-  !*** ./src/client/app/actions/AppStateActionCreators.js ***!
-  \**********************************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var AppDispatcher = __webpack_require__(/*! ../dispatcher/AppDispatcher */ 170);
-	
-	function setGreeting(message) {
-	    var action = {
-	        type: 'set_greeting',
-	        message: message
-	    };
-	    AppDispatcher.dispatch(action);
-	}
-	function setAppState(state) {
-	    var action = {
-	        type: 'set_app_state',
-	        state: state
-	    };
-	    AppDispatcher.dispatch(action);
-	}
-	
-	module.exports = {
-	    setGreeting: setGreeting,
-	    setAppState: setAppState
-	};
 
 /***/ }
 /******/ ]);
