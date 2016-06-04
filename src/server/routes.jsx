@@ -13,7 +13,7 @@ var routes = function(app, passport){
 
     app.route('/')
         .get(isLoggedIn, function(req, res){
-            var InitialState = {greeting: 'greetings from server mwahahahahah!', authenticated: true, user: req.user.toObject()};
+            var InitialState = {greeting: 'greetings from server mwahahahahah!', authenticated: true, user: req.user.toObject(), path: '/'};
             var ReactString = ReactDOMServer.renderToString(<Application initialState={InitialState}/>);
             res.render(__dirname+'/../client/public/index.hbs',
                 {ReactString: ReactString,
@@ -23,7 +23,7 @@ var routes = function(app, passport){
 
     app.get('/message/:m', function(req, res){
         var message = req.params.m;
-        var InitialState = {greeting: message};
+        var InitialState = {greeting: message, path:'/message'};
         var ReactString = ReactDOMServer.renderToString(<Application initialState={InitialState}/>);
         res.render(__dirname+'/../client/public/index.hbs',
             {ReactString: ReactString,
@@ -34,13 +34,32 @@ var routes = function(app, passport){
     app.route('/login')
         .get(function(req, res){
         var message = 'You need to login';
-        var InitialState = {greeting: message, authenticated: false};
+        var InitialState = {greeting: message, authenticated: false, path:'/login'};
         var ReactString = ReactDOMServer.renderToString(<Application initialState={InitialState}/>);
         res.render(__dirname+'/../client/public/index.hbs',
             {ReactString: ReactString,
                 InitialState: JSON.stringify(InitialState),
                 BundlePath: '/js/bundle.js'});
-    });
+        })
+        .post(passport.authenticate('local-login',{
+            successRedirect: '/',
+            failureRedirect: '/login'
+        }));
+
+    app.route('/signup')
+        .get(function(req, res){
+            var message = 'You are at the signup page';
+            var InitialState = {greeting: message, authenticated: false, path: '/signup'};
+            var ReactString = ReactDOMServer.renderToString(<Application initialState={InitialState}/>);
+            res.render(__dirname+'/../client/public/index.hbs',
+                {ReactString: ReactString,
+                    InitialState: JSON.stringify(InitialState),
+                    BundlePath: '/js/bundle.js'});
+        })
+        .post(passport.authenticate('local-signup', {
+            successRedirect: '/',
+            failureRedirect: '/signup'
+        }));
 
     app.route('/logout')
         .get(function(req, res){

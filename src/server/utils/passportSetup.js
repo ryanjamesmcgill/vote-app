@@ -1,10 +1,12 @@
 var FacebookStrategy = require('passport-facebook').Strategy;
 var TwitterStrategy = require('passport-twitter').Strategy;
 var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
+var LocalStrategy = require('passport-local').Strategy;
 var User = require('../models/users');
 
 
 var passportSetup = function(passport){
+
     // Configure facebook strategy
     passport.use(new FacebookStrategy({
             clientID: process.env.FACEBOOK_APP_ID,
@@ -13,19 +15,17 @@ var passportSetup = function(passport){
         },
         function(accessToken, refreshToken, profile, done) {
             var userSearch = {
-                domain: 'facebook',
-                domainId: String(profile.id)
+                "facebook.id": String(profile.id)
             };
             var userUpdate = {
-                displayName: String(profile.displayName)
+                "facebook.displayName": String(profile.displayName)
             };
             User.findOrCreate(userSearch, userUpdate, function(err, user){
-                if (err) return done(err);
+                if (err) throw err;
                 return done(null, user);
             });
         }
     ));
-
 
     // Configure twitter strategy
     passport.use(new TwitterStrategy({
@@ -36,14 +36,13 @@ var passportSetup = function(passport){
         function(token, tokenSecret, profile, done) {
             console.log('in twitter callback');
             var userSearch = {
-                domain: 'twitter',
-                domainId: String(profile.id)
+                "twitter.id": String(profile.id)
             };
             var userUpdate = {
-                displayName: String(profile.displayName)
+                "twitter.displayName": String(profile.displayName)
             };
             User.findOrCreate(userSearch, userUpdate, function(err, user){
-                if (err) return done(err);
+                if (err) throw err;
                 return done(null, user);
             });
         }
@@ -58,27 +57,56 @@ var passportSetup = function(passport){
         function(token, tokenSecret, profile, done) {
             console.log('in google callback');
             var userSearch = {
-                domain: 'google',
-                domainId: String(profile.id)
+                "google.id": 'google'
             };
             var userUpdate = {
-                displayName: String(profile.displayName)
+                "google.displayName": String(profile.displayName)
             };
             User.findOrCreate(userSearch, userUpdate, function(err, user){
-                if (err) return done(err);
+                if (err) throw err;
                 return done(null, user);
             });
         }
     ));
 
+    // Configure local-signup strategy
+    passport.use('local-signup', new LocalStrategy(
+        function(username, password, done) {
+            User.findOne({'local.username': username}, function (err, user) {
+                if (err) return done(err);
+                if (user) {
+                    return done(null, false); //username already exists
+                } else {
+                    var newUser = new User();
 
-    // Configure Passport authenticated session persistence.
-    //
-    // In order to restore authentication state across HTTP requests, Passport needs
-    // to serialize users into and deserialize users out of the session.  The
-    // typical implementation of this is as simple as supplying the user ID when
-    // serializing, and querying the user record by ID from the database when
-    // deserializing.
+                    // set the user's local credentials
+                    newUser.local.username = username;
+                    newUser.local.password = newUser.generateHash(password);
+
+                    // save the user
+                    newUser.save(function (err) {
+                        if (err) throw err;
+                        return done(null, newUser);
+                    });
+                }
+            });
+        }
+    ));
+
+    // Configure local-login strategy
+    passport.use('local-login', new LocalStrategy(
+        function(username, password, done) {
+            User.findOne({ 'local.username' :  username }, function(err, user) {
+                // if there are any errors, return the error before anything else
+                if (err) return done(err);
+                if (!user) return done(null, false); //no username found
+                if (!user.validPassword(password)) return done(null, false); //wrong password
+                return done(null, user);
+            });
+        })
+    );
+
+    // Serialize functions for sessions
     passport.serializeUser(function(user, cb) {
         cb(null, user._id);
     });
