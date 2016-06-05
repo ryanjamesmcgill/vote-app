@@ -5,15 +5,19 @@ var assign = require('object-assign');
 var CHANGE_EVENT = 'change';
 
 var AppState = {
-    greeting: ""
+    user: {},
+    authenticated: false
 };
 
 //setter functions here
 function setAppState(state){
     AppState = assign({},state);
 }
-function setGreeting(message){
-    AppState.greeting = message;
+function setUser(user){
+    AppState.user = user;
+}
+function setAuthenticated(bool){
+    AppState.authenticated = bool;
 }
 function emitChange(){
 	AppStateStore.emit(CHANGE_EVENT);
@@ -21,6 +25,7 @@ function emitChange(){
 
 var AppStateStore = assign({}, EventEmitter.prototype, {
 	addChangeListener: function(callback){
+        console.log('in add change listener');
 		this.on(CHANGE_EVENT, callback);
 	},
 	removeChangeListener: function(callback){
@@ -37,8 +42,12 @@ function handleAction(action){
 			setAppState(action.state);
             emitChange();
             break;
-		case 'set_greeting':
-			setGreeting(action.message);
+        case 'set_user':
+			setUser(action.user);
+			emitChange();
+			break;
+		case 'set_authenticated':
+			setAuthenticated(action.bool);
 			emitChange();
 			break;
 		default: // .. do nothing

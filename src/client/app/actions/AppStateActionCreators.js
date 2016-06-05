@@ -1,12 +1,5 @@
 var AppDispatcher = require('../dispatcher/AppDispatcher');
 
-function setGreeting(message){
-    var action = {
-        type: 'set_greeting',
-        message: message
-    };
-    AppDispatcher.dispatch(action);
-}
 function setAppState(state){
     var action = {
         type: 'set_app_state',
@@ -14,8 +7,23 @@ function setAppState(state){
     };
     AppDispatcher.dispatch(action);
 }
+function setUser(user){
+    var action = {
+        type: 'set_user',
+        user: user
+    };
+    AppDispatcher.dispatch(action);
+}
+function setAuthenticated(bool){
+    var action = {
+        type: 'set_authenticated',
+        bool: bool
+    };
+    AppDispatcher.dispatch(action);
+}
 
 module.exports = {
-	setGreeting: setGreeting,
-    setAppState: setAppState
+    setAppState: setAppState,
+    setUser: setUser,
+    setAuthenticated: setAuthenticated
 };

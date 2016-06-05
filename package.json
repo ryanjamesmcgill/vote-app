@@ -37,6 +37,7 @@
     "react": "^15.1.0",
     "react-dom": "^15.1.0",
     "react-router": "^2.4.1",
+    "superagent": "^2.0.0",
     "webpack": "^1.13.1"
   }
 }

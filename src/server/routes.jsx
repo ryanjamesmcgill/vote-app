@@ -1,70 +1,26 @@
 var React = require('react');
 var ReactDOMServer = require('react-dom/server');
-var Application = require(__dirname + '/../client/app/components/application');
+var path = require('path');
 
 var routes = function(app, passport){
     function isLoggedIn (req, res, next) {
         if (req.isAuthenticated()) {
             return next();
         } else {
-            res.redirect('/login');
+            var output = {err: 'user is not authenticated'};
+            res.send(output);
         }
     }
 
-    app.route('/')
+    app.route('/api/login')
         .get(isLoggedIn, function(req, res){
-            var InitialState = {greeting: 'greetings from server mwahahahahah!', authenticated: true, user: req.user.toObject(), path: '/'};
-            var ReactString = ReactDOMServer.renderToString(<Application initialState={InitialState}/>);
-            res.render(__dirname+'/../client/public/index.hbs',
-                {ReactString: ReactString,
-                    InitialState: JSON.stringify(InitialState),
-                    BundlePath: '/js/bundle.js'});
+            var output = {user: req.user.toObject()};
+            res.send(output);
         });
-
-    app.get('/message/:m', function(req, res){
-        var message = req.params.m;
-        var InitialState = {greeting: message, path:'/message'};
-        var ReactString = ReactDOMServer.renderToString(<Application initialState={InitialState}/>);
-        res.render(__dirname+'/../client/public/index.hbs',
-            {ReactString: ReactString,
-                InitialState: JSON.stringify(InitialState),
-                BundlePath: '/js/bundle.js'});
-    });
-
-    app.route('/login')
-        .get(function(req, res){
-        var message = 'You need to login';
-        var InitialState = {greeting: message, authenticated: false, path:'/login'};
-        var ReactString = ReactDOMServer.renderToString(<Application initialState={InitialState}/>);
-        res.render(__dirname+'/../client/public/index.hbs',
-            {ReactString: ReactString,
-                InitialState: JSON.stringify(InitialState),
-                BundlePath: '/js/bundle.js'});
-        })
-        .post(passport.authenticate('local-login',{
-            successRedirect: '/',
-            failureRedirect: '/login'
-        }));
-
-    app.route('/signup')
-        .get(function(req, res){
-            var message = 'You are at the signup page';
-            var InitialState = {greeting: message, authenticated: false, path: '/signup'};
-            var ReactString = ReactDOMServer.renderToString(<Application initialState={InitialState}/>);
-            res.render(__dirname+'/../client/public/index.hbs',
-                {ReactString: ReactString,
-                    InitialState: JSON.stringify(InitialState),
-                    BundlePath: '/js/bundle.js'});
-        })
-        .post(passport.authenticate('local-signup', {
-            successRedirect: '/',
-            failureRedirect: '/signup'
-        }));
-
-    app.route('/logout')
-        .get(function(req, res){
+    app.route('/api/logout')
+        .get(function(req,res){
             req.logout();
-            res.redirect('/');
+            res.send({user: null});
         });
 
     app.route('/auth/facebook')
@@ -99,6 +55,11 @@ var routes = function(app, passport){
                 res.redirect('/');
             });
 
+    //catch all route for frontend, react-routes will handle from here
+    app.use(function(req, res){
+            //res.sendFile(path.resolve('src/client/public/index.html'));
+            res.render(path.resolve('src/client/public/index.hbs'))
+        });
 };
 
 module.exports = routes;
