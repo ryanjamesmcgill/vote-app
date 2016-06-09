@@ -2,11 +2,13 @@
 
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
+var random = require('mongoose-simple-random');
 
 var Poll = new Schema({
     question: String,
-    options: [{Option: String,
-                Votes: Number}]
+    options: [{option: String,
+                votes: Number}]
 });
+Poll.plugin(random);
 
 module.exports = mongoose.model('Poll', Poll);

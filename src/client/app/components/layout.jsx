@@ -1,6 +1,8 @@
 var React = require('react');
-import { checkAuthentication, logoutUser } from '../utils/utils';
+import { checkAuthenticationAPI } from '../utils/utils';
 import AppStateStore from '../stores/AppStateStore.js';
+import LoginPrompt from './modal_loginprompt.jsx';
+import BlankFieldsPrompt from './modal_blankfieldsprompt.jsx';
 import { Link } from 'react-router';
 
 var Application = React.createClass({
@@ -9,7 +11,7 @@ var Application = React.createClass({
         return (state);
     },
     componentWillMount: function(){
-        checkAuthentication();
+        checkAuthenticationAPI();
     },
     componentDidMount: function(){
         AppStateStore.addChangeListener(this._onAppStateChange);
@@ -32,7 +34,7 @@ var Application = React.createClass({
                             <Link to="/profile">My Profile</Link>
                         </li>
                         <li>
-                            <a onClick={logoutUser} href="#">Logout</a>
+                            <a href="/api/logout">Logout</a>
                         </li>
                     </ul>
         } else {
@@ -59,7 +61,7 @@ var Application = React.createClass({
                             <span className="icon-bar"></span>
                             <span className="icon-bar"></span>
                         </button>
-                        <Link to="/"><span className="navbar-brand page-scroll">Would You Rather...</span></Link>
+                        <Link to="/"><span className="navbar-brand page-scroll">Vote'r</span></Link>
                     </div>
                     <div className="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                         { navbar }
@@ -68,11 +70,9 @@ var Application = React.createClass({
             </nav>
 
             <header>
-            <div className="header-content">
-                <div className="header-content-inner">
+                <LoginPrompt />
+                <BlankFieldsPrompt />
                 { this.props.children }
-                </div>
-            </div>
             </header>
         </div>
         );

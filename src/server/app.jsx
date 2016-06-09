@@ -6,6 +6,8 @@ var passport = require('passport');
 var passportSetup = require('./utils/passportSetup');
 var routes = require('./routes');
 var mongoose = require('mongoose');
+var compression = require('compression');
+
 
 
 //configure passport strategy and serializations
@@ -20,7 +22,6 @@ var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function() {
     console.log('[vote-app] connected to database');
-
     //configure view engine to render handlebars templates
     app.set('view engine', 'hbs');
 
@@ -28,8 +29,9 @@ db.once('open', function() {
     // logging, parsing, and session handling.
     app.use(require('morgan')('dev'));
     app.use(require('cookie-parser')());
+    app.use(compression());
     app.use(require('body-parser').urlencoded({ extended: true }));
-    app.use(require('express-session')({ secret: 'keyboard cat', resave: false, saveUninitialized: false }));
+    app.use(require('express-session')({ secret: 'vote for me', resave: false, saveUninitialized: false }));
     app.use(express.static(__dirname + '/../client/public'));
 
 

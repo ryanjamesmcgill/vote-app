@@ -57,7 +57,7 @@ var passportSetup = function(passport){
         function(token, tokenSecret, profile, done) {
             console.log('in google callback');
             var userSearch = {
-                "google.id": 'google'
+                "google.id": String(profile.id)
             };
             var userUpdate = {
                 "google.displayName": String(profile.displayName)
@@ -99,8 +99,8 @@ var passportSetup = function(passport){
             User.findOne({ 'local.username' :  username }, function(err, user) {
                 // if there are any errors, return the error before anything else
                 if (err) return done(err);
-                if (!user) return done(null, false); //no username found
-                if (!user.validPassword(password)) return done(null, false); //wrong password
+                if (!user) return done(null, false, {message:"We couldn't find that username.."}); //no username found
+                if (!user.validPassword(password)) return done(null, false, {message:"Incorrect password.."}); //wrong password
                 return done(null, user);
             });
         })

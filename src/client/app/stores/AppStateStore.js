@@ -1,12 +1,15 @@
 var AppDispatcher = require('../dispatcher/AppDispatcher');
 var EventEmitter = require('events').EventEmitter;
+import request from 'superagent';
+import _ from 'lodash';
 var assign = require('object-assign');
 
 var CHANGE_EVENT = 'change';
 
 var AppState = {
     user: {},
-    authenticated: false
+	userPolls: [],
+    authenticated: false,
 };
 
 //setter functions here
@@ -15,6 +18,19 @@ function setAppState(state){
 }
 function setUser(user){
     AppState.user = user;
+	AppState.userPolls = []; //clear polls from previous user
+	_.forEach(user.polls,function(poll_id){
+		console.log('calling getPollById', poll_id);
+		request
+			.get('/api/poll/'+poll_id)
+			.end(function(err, res){
+				if(err) return console.error(err);
+				addUserPoll(res.body)
+			});
+	});
+}
+function addUserPoll(poll){
+	AppState.userPolls.push(poll);
 }
 function setAuthenticated(bool){
     AppState.authenticated = bool;
@@ -25,7 +41,6 @@ function emitChange(){
 
 var AppStateStore = assign({}, EventEmitter.prototype, {
 	addChangeListener: function(callback){
-        console.log('in add change listener');
 		this.on(CHANGE_EVENT, callback);
 	},
 	removeChangeListener: function(callback){
@@ -33,7 +48,16 @@ var AppStateStore = assign({}, EventEmitter.prototype, {
 	},
 	getAppState: function(){
 		return AppState;
-	}
+	},
+    getUser: function(){
+        return AppState.user;
+    },
+	getUserPolls: function(){
+		return AppState.userPolls;
+	},
+    getAuthenticated: function(){
+        return AppState.authenticated;
+    }
 });
 
 function handleAction(action){
