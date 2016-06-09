@@ -17,6 +17,7 @@ passportSetup(passport);
 var app = express();
 
 //connect to database
+console.log('requesting connection to database...');
 mongoose.connect(process.env.MONGOLAB_URI);
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
