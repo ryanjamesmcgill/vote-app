@@ -1,9 +1,0 @@
-{
-  "name": "vote-app",
-  "description": "freecodecamp.com project - Build a Voting App",
-  "keywords": [
-    "node",
-    "express"
-  ],
-  "image": "heroku/nodejs"
-}
