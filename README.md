@@ -1,4 +1,4 @@
-# Vote'r : An Node / Express / MongoDB / React based voting app
+# Vote'r : A MongoDB / Express / React / Node (MERN) based voting app
 
 <strong>live demo:</strong> <a href="https://voter-rjm.herokuapp.com/">https://voter-rjm.herokuapp.com/</a>
 
